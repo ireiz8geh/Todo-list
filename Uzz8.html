@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My To-Do List</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #222;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            border: 1px solid #444;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        input, button, select {
+            padding: 12px;
+            margin: 10px;
+            border-radius: 6px;
+            border: 1px solid #555;
+            font-size: 16px;
+            background-color: #444;
+            color: white;
+        }
+
+        button {
+            background-color: #777;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #888;
+        }
+
+        .task-container {
+            margin-top: 20px;
+            padding: 10px;
+            border-top: 2px solid #555;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #444;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        li.completed {
+            text-decoration: line-through;
+            background-color: #555;
+        }
+
+        .task-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .task-buttons button {
+            background-color: #666;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .task-buttons button:hover {
+            background-color: #777;
+        }
+
+        .filter-buttons {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .filter-buttons button {
+            background-color: #555;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        .filter-buttons button:hover {
+            background-color: #666;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 14px;
+            color: #bbb;
+        }
+
+        /* Smiley Popup Styling */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #444;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 40px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .popup button {
+            background-color: #777;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .popup button:hover {
+            background-color: #888;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>My To-Do List</h1>
+    
+    <div class="form-container">
+        <input type="text" id="task-title" placeholder="Enter Task Title" required>
+        <input type="date" id="due-date">
+        <button id="add-task-btn">Add Task</button>
+    </div>
+    
+    <div class="filter-buttons">
+        <button onclick="filterTasks('all')">Show All</button>
+        <button onclick="filterTasks('completed')">Completed</button>
+        <button onclick="filterTasks('active')">Active</button>
+    </div>
+    
+    <div class="task-container">
+        <ul id="task-list">
+            <!-- Tasks will be dynamically added here -->
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2025 My To-Do List App | Designed with simplicity</p>
+    </div>
+</div>
+
+<!-- Smiley Popup -->
+<div id="smiley-popup" class="popup">
+    😊
+    <br>
+    <button onclick="closePopup()">Close</button>
+</div>
+
+<script>
+    let tasks = [];
+    
+    // Function to create and display a task
+    function addTask(title, dueDate) {
+        const task = {
+            title: title,
+            dueDate: dueDate,
+            completed: false
+        };
+        tasks.push(task);
+        displayTasks();
+    }
+    
+    // Function to display tasks
+    function displayTasks() {
+        const taskList = document.getElementById("task-list");
+        taskList.innerHTML = ''; // Clear the list before displaying tasks
+
+        tasks.forEach((task, index) => {
+            const li = document.createElement("li");
+            li.className = task.completed ? 'completed' : '';
+            
+            li.innerHTML = `
+                <span><strong>${task.title}</strong> (Due: ${task.dueDate})</span>
+                <div class="task-buttons">
+                    <button onclick="markComplete(${index})">Complete</button>
+                    <button onclick="deleteTask(${index})">Delete</button>
+                </div>
+            `;
+            taskList.appendChild(li);
+        });
+
+        checkAllTasksCompleted();
+    }
+
+    // Function to mark a task as completed
+    function markComplete(index) {
+        tasks[index].completed = !tasks[index].completed;
+        displayTasks();
+    }
+
+    // Function to delete a task
+    function deleteTask(index) {
+        tasks.splice(index, 1);
+        displayTasks();
+    }
+
+    // Function to filter tasks based on their status
+    function filterTasks(filter) {
+        const taskList = document.getElementById("task-list");
+        taskList.innerHTML = ''; // Clear the list before applying filter
+
+        const filteredTasks = tasks.filter(task => {
+            if (filter === 'completed') return task.completed;
+            if (filter === 'active') return !task.completed;
+            return true; // For 'all' filter
+        });
+
+        filteredTasks.forEach((task, index) => {
+            const li = document.createElement("li");
+            li.className = task.completed ? 'completed' : '';
+            
+            li.innerHTML = `
+                <span><strong>${task.title}</strong> (Due: ${task.dueDate})</span>
+                <div class="task-buttons">
+                    <button onclick="markComplete(${index})">Complete</button>
+                    <button onclick="deleteTask(${index})">Delete</button>
+                </div>
+            `;
+            taskList.appendChild(li);
+        });
+
+        checkAllTasksCompleted();
+    }
+
+    // Function to check if all tasks are completed
+    function checkAllTasksCompleted() {
+        const allCompleted = tasks.every(task => task.completed);
+        if (allCompleted) {
+            showSmileyPopup();
+        }
+    }
+
+    // Function to show the smiley popup
+    function showSmileyPopup() {
+        const popup = document.getElementById("smiley-popup");
+        popup.style.display = "block";
+    }
+
+    // Function to close the smiley popup
+    function closePopup() {
+        const popup = document.getElementById("smiley-popup");
+        popup.style.display = "none";
+    }
+
+    // Event listener for the "Add Task" button
+    document.getElementById("add-task-btn").addEventListener("click", function() {
+        const taskTitle = document.getElementById("task-title").value;
+        const dueDate = document.getElementById("due-date").value;
+
+        if (taskTitle && dueDate) {
+            addTask(taskTitle, dueDate);
+            document.getElementById("task-title").value = '';
+            document.getElementById("due-date").value = '';
+        } else {
+            alert("Please fill in both task title and due date.");
+        }
+    });
+
+    // Display tasks when the page loads
+    displayTasks();
+</script>
+
+</body>
+</html>
